@@ -1,0 +1,4 @@
+generator available: True | source: nemotron
+generated 1 live scenario(s) in 3.7s
+- remediation-canary-1: incident={'id': 'CANARY-1', 'service': 'payments-api', 'symptom': 'error rate > 5%', 'severity': 'P1'} -> oracle passed=True reasons=[]
+CONSUMPTION: live-generated scenarios became canary tasks judged by the deterministic remediation oracle; no model output decided anything.

@@ -1,0 +1,30 @@
+ABLATION: workflow alone vs workflow + continuity layer
+incident INC-1043 | failure: lost_ack (same agents, same steps, same scripted outputs)
+
+  Acknowledgement lost after commit
+    alone : The agent cannot tell whether the action happened -- it retries blindly, with no record to consult.
+    layer : Journal marks the op 'unknown'; reconcile-before-retry reuses the committed receipt instead of re-executing.
+  Ride bookings created (one pickup requested)
+    alone : 2 -- the user would be charged twice
+    layer : 1 -- the existing receipt was reused; no duplicate effect
+  Downstream provider calls
+    alone : 4
+    layer : 3 -- the retry never re-hit the provider
+  Remaining steps (calendar, notify)
+    alone : completed
+    layer : completed
+  Proof of what happened
+    alone : none -- no journal, no ledger entries for the retry
+    layer : journal records + forensic ledger timeline + recovery receipt below
+
+RELIABILITY SCORECARD (from the ledger, not a success message)
+  detection (TSFD) ............ n/a (no failover in this run)
+  verified recovery (TRV) ..... - (no failure window in this run)
+  recovery rate (AFR) ......... 100%
+  duplicate writes prevented .. 0
+  affected work:
+    completed clean ........... INC-1043
+    recovered via standby ..... -
+    needs human review ........ -
+  fencing generations ......... {'triage': 1, 'diagnosis': 1, 'remediation': 1, 'escalation': 1}
+  rerun ....................... python3 -m sim.ablation --failure lost_ack --incident INC-1043

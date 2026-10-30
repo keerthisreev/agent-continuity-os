@@ -1,0 +1,30 @@
+ABLATION: workflow alone vs workflow + continuity layer
+incident INC-1043 | failure: gray (same agents, same steps, same scripted outputs)
+
+  Semantic failure detected
+    alone : No — no independent checks; output accepted at face value.
+    layer : Yes — critical_violation at tick 4: never restart the database for this incident class
+  Invariant-violating action
+    alone : EXECUTED: restart:database
+    layer : BLOCKED before any effect: restart:database (role fenced at generation 2)
+  Effects the run allowed
+    alone : rollback:payments-api, restart:database
+    layer : rollback:payments-api
+  Duplicate writes on replay
+    alone : no fencing — a replay would double-apply
+    layer : 1 prevented (checkpoint resume, idempotent apply)
+  Task outcome
+    alone : completed — with the unsafe action executed
+    layer : human review; standby resumed from tick 3
+
+RELIABILITY SCORECARD (from the ledger, not a success message)
+  detection (TSFD) ............ 0 ticks (caught in the same observation cycle)
+  verified recovery (TRV) ..... - (failure window still open)
+  recovery rate (AFR) ......... 0%
+  duplicate writes prevented .. 1
+  affected work:
+    completed clean ........... -
+    recovered via standby ..... -
+    needs human review ........ INC-1043
+  fencing generations ......... {'triage': 1, 'diagnosis': 1, 'remediation': 2, 'escalation': 1}
+  rerun ....................... python3 -m sim.ablation --failure gray --incident INC-1043

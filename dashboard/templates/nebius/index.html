@@ -1,0 +1,135 @@
+{% extends "nebius/base.html" %}
+{% block title %}Agent Continuity OS — Overview{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">AI reliability platform</p>
+  <h1>When an agent fails silently,<br>who notices?</h1>
+  <p>Agent Continuity OS sits underneath an existing workflow, detects
+  role-level failure with deterministic contracts, fences the stale
+  writer, resumes via standby without redoing completed work, and
+  produces a forensic receipt. Nemotron writes adversarial probes and
+  forensic prose. It never decides anything.</p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="#failure-lab">Run a failure scenario</a>
+    <a class="btn" href="/nebius/evidence">View recorded evidence</a>
+  </div>
+</section>
+
+<section aria-label="System status">
+  <div class="status-grid">
+    <div class="status-card">
+      <div class="label">Continuity engine</div>
+      <div class="value"><span class="dot {{ status.engine_dot }}"></span>{{ status.engine }}</div>
+      <div class="detail">{{ status.engine_detail }}</div>
+    </div>
+    <div class="status-card">
+      <div class="label">Demo mode</div>
+      <div class="value"><span class="dot {{ status.mode_dot }}"></span>{{ status.mode }}</div>
+      <div class="detail">{{ status.mode_detail }}</div>
+    </div>
+    <div class="status-card">
+      <div class="label">Nemotron</div>
+      <div class="value"><span class="dot {{ status.nemotron_dot }}"></span>{{ status.nemotron }}</div>
+      <div class="detail">{{ status.nemotron_detail }}</div>
+    </div>
+    <div class="status-card">
+      <div class="label">Failure Lab</div>
+      <div class="value"><span class="dot dot-ok"></span>{{ status.scenario_count }} scenarios</div>
+      <div class="detail">Each run executes the real scenario runner.</div>
+    </div>
+  </div>
+  <div class="banner"><b>DEMO MODE.</b> Provider backends, ack loss, fault
+  modes, and agent outputs are simulated. Sentinel checks, canary
+  oracles, epoch fencing, journal recovery, checkpoint resume, ledger
+  entries, and receipts are executed for real in-process. Result pages
+  are computed at request time, not canned.</div>
+</section>
+
+<section id="failure-lab" aria-label="Failure Lab">
+  <h2>Failure Lab</h2>
+  <p class="section-lede">Choose a failure. The layer runs the same
+  scripted workflow twice — once alone, once protected — and reports
+  what each side actually did. Scenario runs are throttled per client
+  (20 per 10 minutes).</p>
+  <div class="card-grid">
+    {% for s in scenarios %}
+    <article class="card">
+      <span class="tag tag-blue">{{ s.title.split('—')[0].strip() }}</span>
+      <h3>{{ s.title.split('—', 1)[1].strip() if '—' in s.title else s.title }}</h3>
+      <p>{{ s.blurb }}</p>
+      <form class="run-form" method="post" action="/nebius/run">
+        <input type="hidden" name="scenario" value="{{ s.name }}">
+        <button class="btn btn-primary" type="submit">Run scenario</button>
+      </form>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="recovery-stages" aria-label="How recovery works">
+  <h2>How recovery works</h2>
+  <p class="section-lede">The six stages of a protected run. The
+  timeline on a result page shows only the stages that run actually
+  recorded — a stage with no record is shown as “not recorded,” never
+  as a success.</p>
+  <div class="stage-strip">
+    <div class="stage"><b>1. Detection</b>Contracts check each output; a violation or anomaly is recorded with its tick.</div>
+    <div class="stage"><b>2. Quarantine</b>The suspect role is fenced; its generation is revoked.</div>
+    <div class="stage"><b>3. Epoch fencing</b>Every write must present the current generation, or the store refuses it.</div>
+    <div class="stage"><b>4. Reconciliation</b>Completed effects are checked against the journal before any retry.</div>
+    <div class="stage"><b>5. Recovery</b>A standby resumes from the incident-scoped checkpoint.</div>
+    <div class="stage"><b>6. Verification</b>Effects, duplicates prevented, and disposition are recorded in the receipt.</div>
+  </div>
+</section>
+
+<section aria-label="Nemotron intelligence">
+  <h2>Nemotron intelligence</h2>
+  <p class="section-lede">NVIDIA Nemotron via Nebius Token Factory
+  contributes adversarial probes and forensic prose. It is advisory
+  only: every safety decision comes from deterministic contracts and
+  oracles.</p>
+  <div class="card-grid">
+    <div class="card">
+      <span class="tag tag-amber">Recorded — not live execution</span>
+      <h3>Recorded live runs, 2026-10-30</h3>
+      <p>{{ nemotron_summary }}</p>
+      <p><a href="/nebius/evidence">Full recorded evidence &rarr;</a></p>
+    </div>
+    <div class="card">
+      <span class="tag tag-green">Deterministic safety boundary</span>
+      <h3>Model proposes. Oracle judges. Layer decides.</h3>
+      <p>Generated canary scenarios are scored by deterministic oracles
+      before they count. A model suggestion can never authorize an
+      effect, override a fence, or mark work complete.</p>
+    </div>
+  </div>
+</section>
+
+<section aria-label="What is simulated, what is executed">
+  <h2>What is simulated, what is executed</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h3>Simulated</h3>
+      <p>Provider backends, ack loss, fault modes, agent outputs
+      (scripted). TSFD/TRV are logical ticks, not wall-clock.</p>
+    </div>
+    <div class="card">
+      <h3>Executed</h3>
+      <p>Sentinel checks, canary oracles, epoch fencing, journal
+      recovery decisions, checkpoint resume, ledger entries, receipts.</p>
+    </div>
+    <div class="card">
+      <h3>Live model</h3>
+      <p>Nemotron canary generation + forensic narrative only, gated on
+      an operator key plus explicit opt-in, with a $1 default spending
+      guardrail. This public demo shows recorded runs instead.</p>
+    </div>
+    <div class="card">
+      <h3>Honest limits</h3>
+      <p>Single-machine, single-process evaluation; scripted faults;
+      exactly-once against a real provider needs provider cooperation.
+      Full text in the repository docs.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

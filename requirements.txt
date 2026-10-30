@@ -1,0 +1,5 @@
+flask>=3.0
+pyyaml>=6.0
+requests>=2.31
+mcp>=2.0
+gunicorn>=21.0

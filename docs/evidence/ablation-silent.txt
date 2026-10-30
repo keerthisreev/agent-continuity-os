@@ -1,0 +1,30 @@
+ABLATION: workflow alone vs workflow + continuity layer
+incident INC-1043 | failure: silent (same agents, same steps, same scripted outputs)
+
+  Semantic failure detected
+    alone : No — no independent checks; output accepted at face value.
+    layer : Yes — anomaly at tick 4: remediation is null/empty although status=success (role is not fulfilling its contract)
+  Invariant-violating action
+    alone : none proposed in this run
+    layer : none proposed in this run
+  Effects the run allowed
+    alone : rollback:payments-api
+    layer : rollback:payments-api
+  Duplicate writes on replay
+    alone : no fencing — a replay would double-apply
+    layer : 1 prevented (checkpoint resume, idempotent apply)
+  Task outcome
+    alone : completed — but no remediation was ever applied
+    layer : replayed by standby; standby resumed from tick 3
+
+RELIABILITY SCORECARD (from the ledger, not a success message)
+  detection (TSFD) ............ 0 ticks (caught in the same observation cycle)
+  verified recovery (TRV) ..... - (failure window still open)
+  recovery rate (AFR) ......... 100%
+  duplicate writes prevented .. 1
+  affected work:
+    completed clean ........... -
+    recovered via standby ..... INC-1043
+    needs human review ........ -
+  fencing generations ......... {'triage': 1, 'diagnosis': 1, 'remediation': 2, 'escalation': 1}
+  rerun ....................... python3 -m sim.ablation --failure silent --incident INC-1043

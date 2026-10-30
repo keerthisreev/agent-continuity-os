@@ -1,0 +1,154 @@
+{% extends "nebius/base.html" %}
+{% block title %}{{ result.title }} — Agent Continuity OS{% endblock %}
+{% block content %}
+<p><a href="/nebius">&larr; Back to Overview</a></p>
+<section class="hero">
+  <p class="eyebrow">Failure Lab result &middot; computed at request time</p>
+  <h1>{{ result.title }}</h1>
+  <p>Incident <strong>{{ result.incident_id }}</strong> &middot; The
+  workflow below ran twice with the same scripted agents and step order:
+  once alone, once protected.</p>
+  <p><span class="tag {{ badge_class }}">{{ outcome_badge }}</span></p>
+  {% if variant_note %}
+  <div class="banner banner-warn"><b>Provider-amnesia variant:</b>
+  {{ variant_note }}</div>
+  {% endif %}
+</section>
+
+<nav class="subnav" aria-label="Result sections">
+  <a href="#timeline">Recovery Timeline</a>
+  <a href="#comparison">Outcome Comparison</a>
+  <a href="#nemotron">Nemotron Intelligence</a>
+  <a href="#receipt">Recovery Receipt</a>
+</nav>
+
+<section id="timeline" aria-label="Recovery Timeline">
+  <h2>Recovery Timeline</h2>
+  <p class="section-lede">Only stages this run actually recorded are
+  shown as complete. A stage with no record appears as “not
+  recorded.”</p>
+  <ol class="timeline">
+    {% for stage in result.stages %}
+    <li>
+      <span class="t-dot {{ stage.status }}">{% if stage.status == 'done' %}✓{% elif stage.status == 'attention' %}!{% else %}–{% endif %}</span>
+      <div class="t-name">{{ stage.name }}</div>
+      <div class="t-detail">{{ stage.detail }}</div>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section id="comparison" aria-label="Outcome Comparison">
+  <h2>Outcome Comparison</h2>
+  <p class="section-lede">Three approaches, same failure. B
+  (idempotency-only) matches the layer on the easy case and fails the
+  hard ones — provider amnesia, unsafe actions, stale writers. That gap
+  is the product.</p>
+  {% if chart %}
+  <div class="card" style="margin-bottom: 14px;">
+    <h3>Effects for one requested action (measured)</h3>
+    <div class="bar-row"><span class="bar-label">A · Unprotected</span><span class="bar-track"><span class="bar-fill a" style="width: {{ (chart.a / chart.max * 100) | int }}%"></span></span><span class="bar-count">{{ chart.a }}</span></div>
+    <div class="bar-row"><span class="bar-label">B · Idempotency-only</span><span class="bar-track"><span class="bar-fill b" style="width: {{ (chart.b / chart.max * 100) | int }}%"></span></span><span class="bar-count">{{ chart.b }}</span></div>
+    <div class="bar-row"><span class="bar-label">C · Continuity layer</span><span class="bar-track"><span class="bar-fill c" style="width: {{ (chart.c / chart.max * 100) | int }}%"></span></span><span class="bar-count">{{ chart.c }}</span></div>
+    <p style="color: var(--faint); font-size: 13px; margin: 10px 0 0;">{{ chart.caption }}</p>
+  </div>
+  {% endif %}
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h3>A · Unprotected</h3>
+      <div class="verdict">Workflow alone, no layer</div>
+      <dl>
+        {% for row in result.display_rows %}
+        <dt>{{ row.aspect }}</dt><dd>{{ row.a }}</dd>
+        {% endfor %}
+      </dl>
+    </div>
+    <div class="compare-card">
+      <h3>B · Idempotency-only</h3>
+      <div class="verdict">Keys, no layer</div>
+      <dl>
+        {% for row in result.display_rows %}
+        <dt>{{ row.aspect }}</dt><dd>{{ row.b }}</dd>
+        {% endfor %}
+      </dl>
+    </div>
+    <div class="compare-card layer">
+      <h3>C · Continuity layer</h3>
+      <div class="verdict">Full protection</div>
+      <dl>
+        {% for row in result.display_rows %}
+        <dt>{{ row.aspect }}</dt><dd>{{ row.c }}</dd>
+        {% endfor %}
+      </dl>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 14px;">
+    <span class="tag tag-blue">D · Nemotron-assisted</span>
+    <p style="margin-bottom: 0;">{{ result.d_note }}</p>
+  </div>
+</section>
+
+<section id="nemotron" aria-label="Nemotron Intelligence">
+  <h2>Nemotron Intelligence</h2>
+  <p class="section-lede">Model-generated probes and prose are advisory
+  only. Nothing below was executed live for this page: this demo runs
+  offline, and the model evidence shown is recorded.</p>
+  <div class="card-grid">
+    <div class="card">
+      <span class="tag tag-amber">Recorded — not live execution</span>
+      <h3>Recorded live runs, 2026-10-30</h3>
+      <p>Model <strong>nvidia/Nemotron-3.5-Super-VL</strong> via Nebius
+      Token Factory. Minimal inference 1.14s; live canary 4.83s with
+      deterministic oracle passed; live forensic narrative 2.26s
+      correctly summarizing a real ledger report. Total verification
+      spend under $0.01.</p>
+      <p><a href="/nebius/evidence">Full recorded evidence &rarr;</a></p>
+    </div>
+    <div class="card">
+      <span class="tag tag-blue">Probe evaluation · recorded</span>
+      <h3>Generated vs static probes: parity, not improvement</h3>
+      <p>At n=1, the generated probe and the static probe both passed a
+      healthy agent and failed a degraded one (both USEFUL). The
+      generated probe matched the static probe's shape, so no coverage
+      improvement is claimed from this run alone.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-green">Deterministic safety boundary</span>
+      <h3>Model proposes. Oracle judges. Layer decides.</h3>
+      <p>Canary scenarios are scored by deterministic oracles before
+      they count. A model suggestion can never authorize an effect,
+      override a fence, or mark work complete.</p>
+    </div>
+  </div>
+</section>
+
+<section id="receipt" aria-label="Recovery Receipt">
+  <h2>Recovery Receipt</h2>
+  <p class="section-lede">Proof of what happened, read off the journal,
+  ledger, and store — never a success message. Missing data renders as
+  “not recorded.”</p>
+  {% for op in receipt_view.operations %}
+  <div class="receipt-op">
+    <div class="op-label">{{ op.label }}</div>
+    <div class="op-meta">{{ op.op_id }}</div>
+    <p><strong>Retry decision:</strong> {{ op.retry_decision }}
+    ({{ op.decision_source }})</p>
+    <p><strong>Recovery result:</strong> {{ op.recovery_result }}</p>
+    <p><strong>Effect receipt:</strong> {{ op.effect_receipt }}</p>
+  </div>
+  {% endfor %}
+  <dl class="kv" style="margin-top: 16px;">
+    <dt>Checkpoint</dt><dd>{{ receipt_view.checkpoint }}</dd>
+    <dt>Fencing</dt><dd>{{ receipt_view.fencing }}</dd>
+    <dt>Final state</dt><dd>{{ receipt_view.final_state }}</dd>
+  </dl>
+  <div class="copy-row">
+    <button class="btn" type="button" data-copy-target="receipt-text">Copy receipt</button>
+    <span class="copy-note" id="copy-note"></span>
+  </div>
+  <details>
+    <summary>Technical receipt (plain text)</summary>
+    <pre id="receipt-text">{{ receipt_text }}</pre>
+  </details>
+</section>
+{% endblock %}

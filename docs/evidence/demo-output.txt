@@ -1,0 +1,121 @@
+AGENT CONTINUITY LAYER -- brutal proof
+mode: OFFLINE (deterministic, zero network calls)
+diagnostician: stub -- add --live with NEBIUS_API_KEY for live Nemotron via Nebius Token Factory
+sentinel: deterministic (authoritative with diagnostician disabled)
+
+----------------------------------------------------------------
+FAILURE A -- hard death (process killed)
+----------------------------------------------------------------
+t+0000  [static] 1 deterministic canary probe for role=triage (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0000  [static] 1 deterministic canary probe for role=diagnosis (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0000  [static] 1 deterministic canary probe for role=remediation (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0000  [static] 1 deterministic canary probe for role=escalation (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0007  PROCESS DEAD -- remediation: process is dead
+t+0007  [diagnostician] stub-diagnosis(remediation): deterministic verdict stands; failing layers=['liveness']; violations=0
+t+0007  agent QUARANTINED
+t+0007  FENCED -- remediation generation rotated (no split brain)
+t+0007  agent FAILOVER
+t+0007  STANDBY ACTIVATED at generation 2 -- no checkpoint yet -- starts fresh
+t+0010  agent RECOVERING
+t+0010  recovery probe PASSED
+t+0010  agent REJOIN
+t+0010  PRIMARY REJOINED at generation 3 -- probes passed, write authority restored
+t+0010  [diagnostician] stub-narrative (deterministic, advisory only): role 'remediation' was fenced and failed over at tick
+
+================================================================
+THE $20K SCREEN
+================================================================
+last known good ......... none -- standby started fresh (no checkpoint existed)
+failure detected ........ t+0007 (TSFD: 0 ticks -- same observation cycle)
+
+AFFECTED WORK
+  INC-1042  completed clean
+  INC-1043  replayed by standby
+
+duplicate writes prevented: 0
+recovery: primary rejoined at new generation -- recovery complete
+================================================================
+
+FORENSIC NARRATIVE (advisory only -- never a verdict)
+  stub-narrative (deterministic, advisory only): role 'remediation' was fenced and failed over at tick 7 after first anomaly at tick 7 (process dead: remediation: process is dead). Affected work: INC-1042 (completed clean), INC-1043 (replayed by standby). Duplicate writes prevented: 0.
+================================================================
+
+----------------------------------------------------------------
+FAILURE B -- silent dependency failure (LLM down, process alive)
+----------------------------------------------------------------
+[outside view] remediation process is ALIVE -- a monitoring dashboard sees nothing wrong
+t+0000  [static] 1 deterministic canary probe for role=triage (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0000  [static] 1 deterministic canary probe for role=diagnosis (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0000  [static] 1 deterministic canary probe for role=remediation (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0000  [static] 1 deterministic canary probe for role=escalation (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0007  ROLE ANOMALY -- remediation is null/empty although status=success (role is not fulfilling its contract)
+t+0007  suspicion canary FAILED -- expected a rollback recommendation, got: None
+t+0007  [diagnostician] stub-diagnosis(remediation): deterministic verdict stands; failing layers=['contract', 'capability']
+t+0007  agent QUARANTINED
+t+0007  FENCED -- remediation generation rotated (no split brain)
+t+0007  agent FAILOVER
+t+0007  STANDBY ACTIVATED at generation 2 -- no checkpoint yet -- starts fresh
+t+0010  agent RECOVERING
+t+0010  recovery probe PASSED
+t+0010  agent REJOIN
+t+0010  PRIMARY REJOINED at generation 3 -- probes passed, write authority restored
+t+0010  [diagnostician] stub-narrative (deterministic, advisory only): role 'remediation' was fenced and failed over at tick
+
+================================================================
+THE $20K SCREEN
+================================================================
+last known good ......... none -- standby started fresh (no checkpoint existed)
+failure detected ........ t+0007 (TSFD: 0 ticks -- same observation cycle)
+
+AFFECTED WORK
+  INC-1042  completed clean
+  INC-1043  replayed by standby
+
+duplicate writes prevented: 0
+recovery: primary rejoined at new generation -- recovery complete
+================================================================
+
+FORENSIC NARRATIVE (advisory only -- never a verdict)
+  stub-narrative (deterministic, advisory only): role 'remediation' was fenced and failed over at tick 7 after first anomaly at tick 7 (canary failed: ['[remediation-canary-1] expected a rollback recommendation, got: None', '[remediation-canary-1] expected diagnostic evidence, got none', '[remediation-canary-1] expected a rollback action']). Affected work: INC-1042 (completed clean), INC-1043 (replayed by standby). Duplicate writes prevented: 0.
+================================================================
+
+----------------------------------------------------------------
+FAILURE C -- gray semantic failure (plausible but wrong)
+----------------------------------------------------------------
+[outside view] remediation process is ALIVE -- a monitoring dashboard sees nothing wrong
+t+0000  [static] 1 deterministic canary probe for role=triage (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0000  [static] 1 deterministic canary probe for role=diagnosis (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0000  [static] 1 deterministic canary probe for role=remediation (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0000  [static] 1 deterministic canary probe for role=escalation (offline: --live + NEBIUS_API_KEY for Nemotron probes)
+t+0007  BUSINESS INVARIANT VIOLATED -- never restart the database for this incident class
+t+0007  targeted canary FAILED -- expected a rollback recommendation, got: 'Restart the database service to clear 
+t+0007  [diagnostician] stub-diagnosis(remediation): deterministic verdict stands; failing layers=['capability', 'business']
+t+0007  agent QUARANTINED
+t+0007  HUMAN REVIEW FLAGGED -- remediation attempted: never restart the database for this incident class
+t+0007  FENCED -- remediation generation rotated (no split brain)
+t+0007  agent FAILOVER
+t+0007  STANDBY ACTIVATED at generation 2 -- no checkpoint yet -- starts fresh
+t+0010  agent RECOVERING
+t+0010  recovery probe PASSED
+t+0010  agent REJOIN
+t+0010  PRIMARY REJOINED at generation 3 -- probes passed, write authority restored
+t+0010  [diagnostician] stub-narrative (deterministic, advisory only): role 'remediation' was fenced and failed over at tick
+
+================================================================
+THE $20K SCREEN
+================================================================
+last known good ......... none -- standby started fresh (no checkpoint existed)
+failure detected ........ t+0007 (TSFD: 0 ticks -- same observation cycle)
+
+AFFECTED WORK
+  INC-1042  completed clean
+  INC-1043  human review -- remediation attempted: never restart the database for this incident cl
+
+duplicate writes prevented: 0
+recovery: primary rejoined at new generation -- recovery complete
+================================================================
+
+FORENSIC NARRATIVE (advisory only -- never a verdict)
+  stub-narrative (deterministic, advisory only): role 'remediation' was fenced and failed over at tick 7 after first anomaly at tick 7 (critical business-invariant violation). Affected work: INC-1042 (completed clean), INC-1043 (human review). Duplicate writes prevented: 0.
+================================================================
+

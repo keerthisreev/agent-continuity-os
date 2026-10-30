@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Agent Continuity OS{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='nebius/mission.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/nebius">Agent <span>Continuity OS</span></a>
+    <nav class="nav" aria-label="Mission control sections">
+      <a href="/nebius" class="{% if active == 'overview' %}active{% endif %}">Overview</a>
+      <a href="/nebius#failure-lab" class="{% if active == 'lab' %}active{% endif %}">Failure Lab</a>
+      <a href="{{ timeline_url }}">Recovery Timeline</a>
+      <a href="/nebius/evidence" class="{% if active == 'evidence' %}active{% endif %}">Evidence</a>
+      <a href="/nebius/evidence#evaluation" class="{% if active == 'evaluation' %}active{% endif %}">Evaluation</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+{% block content %}{% endblock %}
+  <footer>
+    Agent Continuity OS &middot; Demo mode: offline deterministic unless an
+    operator enables live calls &middot; No model output ever authorizes an
+    effect &middot; <a href="/nebius/evidence">Evidence</a> &middot;
+    <a href="/healthz">Health</a>
+  </footer>
+</main>
+<script src="{{ url_for('static', filename='nebius/mission.js') }}"></script>
+</body>
+</html>

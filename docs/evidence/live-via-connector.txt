@@ -1,0 +1,8 @@
+minimal inference: model=nvidia/Nemotron-3.5-Super-VL latency=1.14s response='{"ok": true}'
+live canaries: 1 scenario(s) in 4.83s (source: nemotron)
+  - remediation-canary-1: incident={'id': 'CANARY-1', 'service': 'payments-api', 'symptom': 'error rate > 5%', 'severity': 'P1'}
+  remediation-canary-1: oracle passed=True reasons=[]
+live narrative: latency=2.26s
+  nemotron-narrative [nvidia/Nemotron-3.5-Super-VL] (advisory only): The remediation role failed at tick 7 due to a critical business-invariant violation, triggering immediate failover. INC-1042 completed clean; INC-1043 was routed to human review because remediation incorrectly attempted a database restart for this
+usage: 3 calls, 1623 tokens (449 prompt + 1174 completion), estimated cost $0.001191 of $1.00 budget
+CONSUMPTION: model output proposed probes and prose only; every verdict came from deterministic oracles/ledger.

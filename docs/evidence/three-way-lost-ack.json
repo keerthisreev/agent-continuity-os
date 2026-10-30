@@ -1,0 +1,59 @@
+{
+  "incident_id": "INC-1043",
+  "failure": "lost_ack",
+  "three_way": true,
+  "rows": [
+    {
+      "aspect": "Acknowledgement lost after commit",
+      "baseline": "No record to consult -- retries blindly, books twice.",
+      "idempotency_only": "Retries blindly with the same key; the provider replays the prior result -- no second booking when the key is honored.",
+      "protected": "Journal marks the op 'unknown'; reconcile-before-retry reuses the committed receipt instead of re-executing."
+    },
+    {
+      "aspect": "Ride bookings created (one pickup requested)",
+      "baseline": "2 -- the user is booked twice",
+      "idempotency_only": "1 -- provider dedupe held; matches the full layer here",
+      "protected": "1 -- the existing receipt was reused; no duplicate effect"
+    },
+    {
+      "aspect": "Provider loses its state before the retry (measured)",
+      "baseline": "still 2 bookings -- nothing was ever deduplicated",
+      "idempotency_only": "2 bookings -- the dedupe table was the provider's memory, and it is gone",
+      "protected": "0 new provider effects -- the agent-side journal still holds the receipt; unverifiable, so the workflow halted (halted=True) and asked for human review"
+    },
+    {
+      "aspect": "Stale agent writes after failover",
+      "baseline": "lands -- nothing checks the writer's epoch",
+      "idempotency_only": "lands (measured: created=True) -- a fresh key from a stale writer is indistinguishable from a live one",
+      "protected": "rejected at the gateway AND the provider -- fencing generations, zero effects recorded"
+    },
+    {
+      "aspect": "Proof of what happened",
+      "baseline": "none -- no journal, no ledger entries for the retry",
+      "idempotency_only": "provider-side only; the agent never learns why",
+      "protected": "journal records + forensic ledger timeline + recovery receipt below"
+    }
+  ],
+  "reused_receipts": 1,
+  "scorecard": {
+    "tsfd_ticks": null,
+    "trv_ticks": null,
+    "afr": 1.0,
+    "has_failure_window": false,
+    "duplicates_prevented": 0,
+    "buckets": {
+      "completed_clean": [
+        "INC-1043"
+      ],
+      "recovered_via_standby": [],
+      "needs_human_review": []
+    },
+    "fencing_generations": {
+      "triage": 1,
+      "diagnosis": 1,
+      "remediation": 1,
+      "escalation": 1
+    },
+    "rerun": "python3 -m sim.ablation --failure lost_ack --incident INC-1043"
+  }
+}

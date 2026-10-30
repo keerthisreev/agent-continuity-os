@@ -1,0 +1,77 @@
+{% extends "nebius/base.html" %}
+{% block title %}Agent Continuity OS — Evidence{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">Evidence</p>
+  <h1>Recorded live evidence, computed evaluation</h1>
+  <p>Everything on this page is either a recorded run (labeled with its
+  date, never presented as live) or a benchmark computed in-process
+  when the page loads. Nothing here is live execution.</p>
+  <div class="banner banner-warn"><b>RECORDED, NOT LIVE.</b> The
+  Nemotron runs below happened on 2026-10-30 during verification. This
+  public demo runs offline and makes no model calls.</div>
+</section>
+
+<section aria-label="Recorded Nemotron runs">
+  <h2>Recorded Nemotron runs</h2>
+  <div class="card-grid">
+    <div class="card">
+      <span class="tag tag-amber">Recorded · first live run</span>
+      <h3>Live canary generation</h3>
+      <p>{{ evidence_first_summary }}</p>
+      <details>
+        <summary>Full recorded output</summary>
+        <pre>{{ evidence_first }}</pre>
+      </details>
+    </div>
+    <div class="card">
+      <span class="tag tag-amber">Recorded · connector run</span>
+      <h3>Inference, canary, and narrative</h3>
+      <p>{{ evidence_connector_summary }}</p>
+      <details>
+        <summary>Full recorded output</summary>
+        <pre>{{ evidence_connector }}</pre>
+      </details>
+    </div>
+  </div>
+  <p style="color: var(--faint); font-size: 14px;">No credentials appear
+  in any evidence text. Keys are never rendered to any page.</p>
+</section>
+
+<section id="evaluation" aria-label="Evaluation">
+  <h2>Evaluation</h2>
+  <p class="section-lede">Computed in-process on page load from the
+  same scenario runner the Failure Lab uses. D (Nemotron-assisted) is
+  the recorded status from verification, not a fresh model call.</p>
+  <table>
+    <tr><th>Scenario</th><th>A · Unprotected</th><th>B · Idempotency-only</th><th>C · Layer</th><th>D · Nemotron</th></tr>
+    {% for row in benchmark_rows %}
+    <tr>
+      <td>{{ row.scenario }}</td>
+      <td>{{ row.a }}</td>
+      <td>{{ row.b }}</td>
+      <td>{{ row.c }}</td>
+      <td>{{ row.d }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <div class="card-grid" style="margin-top: 16px;">
+    <div class="card">
+      <h3>Generated vs static probes (recorded)</h3>
+      <p>Static probe set: 1/1 healthy pass, 1/1 degraded fail —
+      USEFUL. Generated probe set (4.1s, 1,002 tokens, $0.000781):
+      1/1 healthy pass, 1/1 degraded fail — USEFUL. Finding: parity,
+      not a demonstrated coverage improvement at n=1.</p>
+    </div>
+    <div class="card">
+      <h3>Size, assumptions, limits</h3>
+      <p>3 scripted fault scenarios plus the provider-amnesia variant
+      and 1 probe comparison. Single-machine, single-process; scripted
+      backends stand in for real providers; TSFD/TRV are logical
+      ticks. Exactly-once against a real provider needs provider
+      cooperation. Reproduce locally: <span style="font-family: var(--mono); font-size: 13px;">python3 sim/benchmark.py --md</span> and
+      <span style="font-family: var(--mono); font-size: 13px;">python3 sim/compare_probes.py --md</span>.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

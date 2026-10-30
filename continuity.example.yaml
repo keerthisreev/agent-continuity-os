@@ -1,0 +1,30 @@
+# Agent Continuity Layer configuration (optional).
+# Copy to continuity.yaml and edit. All values below are the defaults --
+# with no continuity.yaml present the layer behaves exactly like the
+# brutal proof. Environment overrides are for secrets ONLY (NEBIUS_API_KEY).
+
+hysteresis:
+  anomaly_threshold: 2       # anomalies before quarantine (canary fail => immediate)
+  clean_streak_to_heal: 2    # clean outputs to return DEGRADED -> HEALTHY
+
+canary:
+  suspicion_only: true       # canaries run on suspicion/probing only, never continuously
+
+epoch:
+  ttl_ticks: 0               # 0 = epochs never expire
+
+nemotron:
+  model: nvidia/Nemotron-3.5-Super-VL
+  base_url: https://api.tokenfactory.nebius.com/v1
+  timeout_s: 20
+  retries: 2                 # retries after the first attempt
+  circuit_breaker_failures: 3
+  circuit_breaker_open_s: 60 # breaker open duration after threshold failures
+
+logging:
+  path: null                 # e.g. logs/continuity.jsonl ; null = in-memory only
+  level: INFO
+
+dashboard:
+  host: 127.0.0.1
+  port: 5000

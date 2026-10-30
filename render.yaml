@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: agent-continuity-os
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    envVars:
+      # Demo stays fully offline unless the operator opts in AND sets a key.
+      # live_enabled() only accepts 1/true/yes/on, so "0" is safely off.
+      - key: CONTINUITY_LIVE
+        value: "0"
+      # Model spend cap for any operator-enabled live calls.
+      - key: CONTINUITY_BUDGET_USD
+        value: "1.0"
+      # Ephemeral on free instances: restarts/redeploys reset the local
+      # count; the provider balance remains the backstop.
+      - key: CONTINUITY_USAGE_FILE
+        value: /tmp/continuity-usage.json
+      # Set in the Render dashboard only. Never commit a key here.
+      - key: NEBIUS_API_KEY
+        sync: false
