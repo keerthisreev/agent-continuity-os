@@ -56,7 +56,7 @@ docker run -p 5000:5000 agent-continuity-os   # gunicorn on $PORT
 ```
 
 Or connect the repo on Render: `render.yaml` (branch
-`hackathon/nebius-nvidia`) provisions the web service with health
+`main`) provisions the web service with health
 check `/healthz`. The public demo runs fully offline by default
 (`CONTINUITY_LIVE=0`): scenario runs are CPU-only simulations, the
 Nemotron panel shows recorded live evidence, and no model call is
@@ -69,14 +69,15 @@ budget is the hard control). The app writes nothing to the repo tree;
 usage persistence (`CONTINUITY_USAGE_FILE`) is best-effort on
 ephemeral disks. No key ever appears in frontend code or responses.
 
-**Deployment status (honest).** The Docker/Render configuration is
-complete and the gunicorn path was verified locally (healthz, judge
-pages, scenario runs, throttling all green). No public URL exists yet:
-no Render/hosting account is connected to this workspace, and the
-Docker daemon is unavailable here, so the image could not be built or
-pushed from this machine. Deploying is a one-click step from the
-pushed branch once a hosting account is connected — it is not claimed
-until a public URL answers `/healthz`.
+**Deployment status.** Live demo:
+https://agent-continuity-os.onrender.com/nebius (health: `/healthz`).
+The demo runs fully offline by default and was verified end to end
+with the Mission Control UI, all four Failure Lab scenarios, receipts,
+and throttling. The demo currently serves the same code from the
+submission branch; this repo carries that code plus `render.yaml`, so
+it deploys as-is on Render. The Docker/Render configuration was also
+verified locally (healthz, judge pages, scenario runs, throttling all
+green).
 
 **Provenance (eligible period).** The continuity engine was developed
 by the author in October 2026 before this branch. Work on this branch
