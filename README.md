@@ -35,12 +35,14 @@ judged by the deterministic oracle. Full numbers:
 [docs/measurements.md](docs/measurements.md); raw outputs:
 [docs/evidence/](docs/evidence/).
 
-**Provenance (honest).** The continuity engine was developed by the
-author in October 2026; this branch adds the Nebius submission work:
-the three-way lost-acknowledgement comparison, journal-based
-commit-aware recovery, the live Token Factory integration evidence, the
-measurement comparison, and the submission docs. The Amazon Alexa+
-submission lives on its own branch and is untouched by this branch.
+**Provenance.** The continuity engine was developed by the author in
+October 2026. The Nebius submission work (submitted state: `main` at
+`0f71e44`) added the three-way lost-acknowledgement comparison,
+journal-based commit-aware recovery, the live Token Factory
+integration evidence, the measurement comparison, the benchmark, the
+Mission Control judge dashboard, deployment configuration, and these
+docs — all dated 2026-10-30, the hackathon deadline day. The Amazon
+Alexa+ submission lives on its own branch and is untouched.
 
 **Limitations.** Fault modes are scripted and preconfigured (not
 generalized AI-failure detection); TSFD/TRV are logical ticks, not
@@ -78,14 +80,6 @@ submission branch; this repo carries that code plus `render.yaml`, so
 it deploys as-is on Render. The Docker/Render configuration was also
 verified locally (healthz, judge pages, scenario runs, throttling all
 green).
-
-**Provenance (eligible period).** The continuity engine was developed
-by the author in October 2026 before this branch. Work on this branch
-(all commits dated 2026-10-30, the hackathon deadline day) is the
-submission work: the three-way comparison, journal recovery, live
-Token Factory verification, benchmark, judge dashboard, deployment
-configuration, and these docs. The Amazon Alexa+ submission lives on
-its own branch and is untouched.
 
 ## The problem (origin story)
 
@@ -155,8 +149,9 @@ forensic ledger.
 **Local:**
 ```bash
 pip install -r requirements.txt
-python3 test_continuity.py   # 10/10: the brutal proof
+python3 test_continuity.py   # 12/12: the brutal proof
 python3 test_robust.py       #  9/9: hardening (config, threads, export, dashboard, client)
+python3 run_release_tests.py # full release suite (137 pass, 0 fail on this branch; 115 at submission)
 python3 demo.py              # the story, zero narration
 python3 demo.py --failure gray
 python3 dashboard/app.py     # live dashboard -> http://127.0.0.1:5000/
@@ -224,6 +219,15 @@ the JSONL log path. Secrets come from the environment only
 standby activated → affected-work map (completed clean / replayed by
 standby / human review / duplicates prevented) → primary rejoin at a new
 epoch → recovery complete.
+
+**Mission Control Failure Lab.** The dashboard runs four challenges
+that exercise the same machinery from the other side: lost
+acknowledgement (the three-way comparison: naive retry,
+idempotency-only, layer), unsafe action (mode C above, blocked before
+any effect), stale writer (a fenced primary's delayed write, rejected
+at the store boundary), and silent semantic failure (mode B above,
+replayed by standby). Modes A–C are `demo.py`'s scripted failures; the
+four challenges are `sim/ablation.py`'s.
 
 ## Metrics
 

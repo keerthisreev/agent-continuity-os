@@ -39,8 +39,11 @@ and is not made here.
 
 ## Live Nemotron evidence
 
-Reproduce: `python3 ~/workspace/custom-connectors/custom.nebius-token-factory/bin/live_verify.py`
-(see the connector doc for the exact command).
+Reproduce (recorded evidence, no key needed):
+`docs/evidence/live-via-connector.txt` and
+`docs/evidence/live-canary-remediation.txt`. A fresh live run needs
+`NEBIUS_API_KEY` plus `CONTINUITY_LIVE=1` and is covered by
+`test_live_nebius.py` (skips cleanly without a key).
 
 - Endpoint: `https://api.tokenfactory.nebius.com/v1/chat/completions`
 - Model: `nvidia/Nemotron-3.5-Super-VL` (verified from live responses)
@@ -55,17 +58,20 @@ Reproduce: `python3 ~/workspace/custom-connectors/custom.nebius-token-factory/bi
 
 ## Evaluation size, assumptions, limitations
 
-- Size: 3 scripted fault scenarios (gray, silent, lost_ack) + 1
-  stale-write challenge + 1 probe comparison (1 static, 1 generated).
-  This is a demonstration sample, not a statistical evaluation.
+- Size: 4 Failure Lab challenges (lost_ack, unsafe, stale_write,
+  silent) + the three-way lost-ack benchmark + 1 probe comparison
+  (1 static, 1 generated, parity at n=1). This is a demonstration
+  sample, not a statistical evaluation. A 40-case adversarial
+  benchmark now lives in `sim/adversarial_benchmark.py`
+  (post-hackathon work, `post-hackathon/v2` branch).
 - Assumptions: scripted backends stand in for real providers; the
   provider's committed-state lookup is trusted for reconciliation;
   TSFD/TRV are logical ticks, not wall-clock.
 - Limitations: single-machine, single-process; no distributed fencing;
   no real-provider exactly-once guarantee; model probe quality at n=1
-  is unproven beyond parity; no public demo URL exists yet (see
-  deployment notes in the README — Docker/Render config is ready,
-  deployment itself needs a connected hosting account).
+  is unproven beyond parity; public demo live at
+  https://agent-continuity-os.onrender.com/nebius (see deployment
+  notes in the README).
 - Reproducibility: `python3 sim/benchmark.py`, `python3
   sim/compare_probes.py`, `python3 demo_e2e.py`, `python3
   demo_e2e.py --failure lost_ack`, and the full test files under
